@@ -20,6 +20,7 @@ def generate_interview_questions(text, mode="自己PR"):
   【想定質問】
   """
     response = model.generate_content(prompt)
+    print(f"response: {response.text}")
     return response.text
 
 

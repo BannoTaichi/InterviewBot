@@ -1,7 +1,10 @@
 import google.generativeai as genai
+from dotenv import load_dotenv
+import os
 
 # 取得したAPIキーを設定
-API_KEY = "AIzaSyCrV9QAgK9Y2d_qX7Po74PjPidTWd9eYCw"
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 genai.configure(api_key=API_KEY)
 
 

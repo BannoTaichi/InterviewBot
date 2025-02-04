@@ -13,3 +13,7 @@ __pycache__/
 # 音声ファイルを無視
 *.wav
 *.mp3
+
+# audioフォルダを追跡
+!audio/
+!audio/.gitkeep

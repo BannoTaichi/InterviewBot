@@ -8,66 +8,78 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
-OUTPUT_FILENAME = "../audio/output.wav"
 
 # pyaudio の初期化
 p = pyaudio.PyAudio()
+recording_flag = False
 
 
-# 録音開始
+# 録音データを格納するリスト
 def start_recording():
-    global frames, stream
+    global frames, stream, recording_flag
     print("録音開始")
     frames = []
     stream = p.open(
         format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
     )
 
-    # 録音データを取得
     while recording_flag:
         data = stream.read(CHUNK)
         frames.append(data)
 
 
-# 録音停止
+# 録音を停止して音声ファイルを保存
 def stop_recording():
-    global recording_flag, stream
+    global recording_flag, stream, filename_entry
+
+    if not recording_flag:  # すでに録音が停止している場合は何もしない
+        return
+
     print("録音停止")
     recording_flag = False
     stream.stop_stream()
     stream.close()
     p.terminate()
 
-    # 録音したデータを WAV ファイルに保存
-    with wave.open(OUTPUT_FILENAME, "wb") as wf:
+    filename = filename_entry.get()
+    if not filename.endswith(".wav"):
+        filename += ".wav"
+    path = f"../audio/{filename}"
+
+    with wave.open(path, "wb") as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(p.get_sample_size(FORMAT))
         wf.setframerate(RATE)
         wf.writeframes(b"".join(frames))
 
-    print(f"録音された音声は {OUTPUT_FILENAME} として保存されました。")
+    print(f"録音された音声は {filename} として保存されました。")
 
 
-# 録音開始ボタン
+# 録音ボタンが押されたときの処理
 def on_record_button_click():
     global recording_flag
     recording_flag = True
-    threading.Thread(target=start_recording).start()  # 録音を別スレッドで実行
+    threading.Thread(target=start_recording).start()
 
 
-if __name__ == "__main__":
-    # 録音の状態を管理するフラグ
-    recording_flag = False
-
-    # GUI ウィンドウの設定
+# GUI を表示
+def run_GUI():
+    global filename_entry
     root = tk.Tk()
     root.title("録音アプリ")
 
-    # 録音ボタン・停止ボタンの設定
+    tk.Label(root, text="保存ファイル名 (拡張子なし)").pack()
+    filename_entry = tk.Entry(root)
+    filename_entry.pack(pady=5)
+    filename_entry.insert(0, "output")
+
     record_button = tk.Button(root, text="録音開始", command=on_record_button_click)
     record_button.pack(pady=10)
     stop_button = tk.Button(root, text="録音停止", command=stop_recording)
     stop_button.pack(pady=10)
 
-    # GUI の開始
     root.mainloop()
+
+
+if __name__ == "__main__":
+    run_GUI()

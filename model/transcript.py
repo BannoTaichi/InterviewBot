@@ -29,6 +29,7 @@ def transcript(audio_file, directory="../audio"):
     try:
         text = recognizer.recognize_google(audio_data, language="ja-JP")
         print("認識結果:", text)
+        return text
     except sr.UnknownValueError:
         print("音声を認識できませんでした")
     except sr.RequestError:

@@ -16,7 +16,7 @@ def mp3_to_wav(audio_file):
 
 
 # WAV ファイルの文字起こし
-def transcript(audio_file, directory="../audio"):
+def transcript(directory, audio_file):
     path = f"{directory}/{audio_file}"
     if audio_file.endswith(".mp3"):
         path = mp3_to_wav(path)
@@ -37,5 +37,6 @@ def transcript(audio_file, directory="../audio"):
 
 
 if __name__ == "__main__":
-    audio_file = "gTTS_test.mp3"
-    transcript(audio_file)
+    directory = "../audio"
+    audio_file = "question0.mp3"
+    transcript(directory, audio_file)

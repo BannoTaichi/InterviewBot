@@ -16,23 +16,22 @@ class Chatbot:
         self.model = genai.GenerativeModel("gemini-pro")
 
     # 質問生成
-    def first_question(self, text, mode="自己PR"):
+    def first_question(self, text):
         prompt = f"""
-        以下の文章は、面接での{mode}とこれまでの面接内容です。この内容に基づいて、面接官が聞きそうな質問をセリフとして1つ出力してください。
+        以下の文章は、面接での{self.mode}とこれまでの面接内容です。この内容に基づいて、面接官が聞きそうな質問をセリフとして1つ出力してください。
         
         【出力のルール】
         なお読みが難しい漢字は平仮名で出力してください。
         前と同じような質問になりそうなら、適宜内容を変えてください。
         質問については、「行動を行なった理由」「論理的に正しいかどうか」「仕事における再現性があるか」などを重要な観点として考えてください。
 
-        【{mode}】
+        【{self.mode}】
         {text}
 
         【面接内容】
         面接官："""
         response = self.model.generate_content(prompt)
         self.context = prompt + response.text
-        print(f"\nresponse: {response.text}")
         print(f"context: {self.context}\n")
         return response.text
 
@@ -42,7 +41,6 @@ class Chatbot:
         面接官："""
         response = self.model.generate_content(prompt)
         self.context = prompt + response.text
-        print(f"response: {response.text}")
         print(f"context: {self.context}\n")
         return response.text
 

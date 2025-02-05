@@ -3,6 +3,9 @@ import pyaudio
 import wave
 import threading
 
+global voice_filename
+voice_filename = "output.wav"
+
 # 録音の設定
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -19,10 +22,12 @@ def start_recording():
     global frames, stream, recording_flag
     print("録音開始")
     frames = []
+
     stream = p.open(
         format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
     )
 
+    recording_flag = True
     while recording_flag:
         data = stream.read(CHUNK)
         frames.append(data)
@@ -30,7 +35,7 @@ def start_recording():
 
 # 録音を停止して音声ファイルを保存
 def stop_recording():
-    global recording_flag, stream, filename_entry
+    global recording_flag, stream, filename_entry, directory, voice_filename
 
     if not recording_flag:  # すでに録音が停止している場合は何もしない
         return
@@ -41,18 +46,18 @@ def stop_recording():
     stream.close()
     p.terminate()
 
-    filename = filename_entry.get()
-    if not filename.endswith(".wav"):
-        filename += ".wav"
-    path = f"../audio/{filename}"
+    voice_filename = filename_entry.get()
+    if not voice_filename.endswith(".wav"):
+        voice_filename += ".wav"
+    voice_path = f"{directory}/{voice_filename}"
 
-    with wave.open(path, "wb") as wf:
+    with wave.open(voice_path, "wb") as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(p.get_sample_size(FORMAT))
         wf.setframerate(RATE)
         wf.writeframes(b"".join(frames))
 
-    print(f"録音された音声は {filename} として保存されました。")
+    print(f"録音された音声は {voice_filename} (voice_filename) として保存されました。")
 
 
 # 録音ボタンが押されたときの処理
@@ -63,8 +68,9 @@ def on_record_button_click():
 
 
 # GUI を表示
-def run_GUI():
-    global filename_entry
+def run_GUI(folder):
+    global filename_entry, directory
+    directory = folder
     root = tk.Tk()
     root.title("録音アプリ")
 
@@ -82,4 +88,5 @@ def run_GUI():
 
 
 if __name__ == "__main__":
-    run_GUI()
+    folder = "../audio"
+    run_GUI(folder)

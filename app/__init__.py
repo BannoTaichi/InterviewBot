@@ -15,8 +15,8 @@ def app_run(user_input, directory, filename, mode="自己PR"):
     while True:
         # 生成した質問の音声を再生
         path = f"{directory}/{filename}"
-        create_mp3(question, f"{path}{idx}")
-        play_mp3(f"{path}{idx}")
+        create_mp3(question, path)
+        play_mp3(path)
 
         run_GUI(directory)
         answer = transcript(directory, voice_filename)

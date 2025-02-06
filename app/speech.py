@@ -9,7 +9,7 @@ except:
     from chat import Chatbot
 
 global idx
-idx = 0
+idx = -1
 
 
 # 音声ファイルを作成
@@ -18,6 +18,7 @@ def create_mp3(text, filename):
     idx += 1
 
     path = f"{filename}{idx}.mp3"
+    print(f"想定質問の音声は {path} として保存されました。")
     tts = gTTS(text, lang="ja")
     tts.save(path)
 

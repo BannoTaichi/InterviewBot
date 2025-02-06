@@ -2,6 +2,7 @@ import tkinter as tk
 import pyaudio
 import wave
 import threading
+from .speech import idx
 
 global voice_filename
 voice_filename = "output.wav"
@@ -23,8 +24,15 @@ def start_recording():
     print("録音開始")
     frames = []
 
+    input_device_index = select_device()  # デバイスの選択
+
     stream = p.open(
-        format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+        format=FORMAT,
+        channels=CHANNELS,
+        rate=RATE,
+        input=True,
+        frames_per_buffer=CHUNK,
+        input_device_index=input_device_index,
     )
 
     recording_flag = True
@@ -33,9 +41,30 @@ def start_recording():
         frames.append(data)
 
 
+# 入力デバイスを選択
+def select_device():
+    p = pyaudio.PyAudio()  # pyaudio の初期化
+    input_device_index = None
+    for i in range(p.get_device_count()):
+        info = p.get_device_info_by_index(i)
+        print(
+            f"Device {i}: {info['name'].encode('shift-jis').decode('utf-8', errors='ignore')}"
+        )
+        if "マイク" or "Microphone" in info["name"]:  # 適切なデバイス名を指定
+            input_device_index = i
+            break
+
+    if input_device_index is None:
+        print(
+            "適切な入力デバイスが見つかりませんでした。デフォルトのデバイスを使用します。"
+        )
+        input_device_index = p.get_default_input_device_info()["index"]
+    return input_device_index
+
+
 # 録音を停止して音声ファイルを保存
 def stop_recording():
-    global recording_flag, stream, filename_entry, directory, voice_filename
+    global recording_flag, stream, directory, voice_filename
 
     if not recording_flag:  # すでに録音が停止している場合は何もしない
         return
@@ -46,11 +75,12 @@ def stop_recording():
     stream.close()
     p.terminate()
 
-    voice_filename = filename_entry.get()
-    if not voice_filename.endswith(".wav"):
-        voice_filename += ".wav"
-    voice_path = f"{directory}/{voice_filename}"
+    save_voicefile(directory, voice_filename)  # 音声ファイルを保存
 
+
+# 音声ファイルを保存
+def save_voicefile(directory, voice_filename):
+    voice_path = f"{directory}/{voice_filename}"
     with wave.open(voice_path, "wb") as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(p.get_sample_size(FORMAT))
@@ -69,21 +99,15 @@ def on_record_button_click():
 
 # GUI を表示
 def run_GUI(folder):
-    global filename_entry, directory
+    global directory
     directory = folder
+
     root = tk.Tk()
     root.title("録音アプリ")
-
-    tk.Label(root, text="保存ファイル名 (拡張子なし)").pack()
-    filename_entry = tk.Entry(root)
-    filename_entry.pack(pady=5)
-    filename_entry.insert(0, "output")
-
     record_button = tk.Button(root, text="録音開始", command=on_record_button_click)
     record_button.pack(pady=10)
     stop_button = tk.Button(root, text="録音停止", command=stop_recording)
     stop_button.pack(pady=10)
-
     root.mainloop()
 
 

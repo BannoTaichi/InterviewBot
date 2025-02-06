@@ -1,5 +1,7 @@
 import speech_recognition as sr
 from pydub import AudioSegment
+import os
+from .record import voice_filename
 
 # 音声認識用のインスタンスを生成
 recognizer = sr.Recognizer()
@@ -29,11 +31,22 @@ def transcript(directory, audio_file):
     try:
         text = recognizer.recognize_google(audio_data, language="ja-JP")
         print("認識結果:", text)
+        delete_file(path)
         return text
     except sr.UnknownValueError:
         print("音声を認識できませんでした")
     except sr.RequestError:
         print("Google Speech API に接続できませんでした")
+
+    delete_file(path)
+
+
+def delete_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"{file_path} を削除しました")
+    else:
+        print(f"{file_path} が見つかりません")
 
 
 if __name__ == "__main__":

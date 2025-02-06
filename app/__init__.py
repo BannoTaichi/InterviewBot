@@ -1,4 +1,5 @@
 import sys
+from pprint import pprint
 
 sys.path.append("./")
 
@@ -11,6 +12,7 @@ from .transcript import transcript
 def app_run(user_input, directory, filename, mode="自己PR"):
     bot = Chatbot(mode)
     question = bot.first_question(user_input)
+    dialogue = [("面接官", question)]
 
     while True:
         # 生成した質問の音声を再生
@@ -22,9 +24,13 @@ def app_run(user_input, directory, filename, mode="自己PR"):
         answer = transcript(directory, voice_filename)
         question = bot.next_question(answer)
 
+        dialogue.append(("受験生", answer))
+        dialogue.append(("面接官", question))
+        pprint(dialogue)
+
 
 if __name__ == "__main__":
-    user_input = "私は、大学の研究でガラスの上に銀薄膜の島状構造を作り、光増強性能を評価する研究を行っています。実験装置の改造を行い、実験条件を2倍に広げることに成功しました。"
+    user_input = input("自己PRを入力してください：")
     directory = "../audio"
     filename = "question"
     app_run(user_input, directory, filename)
